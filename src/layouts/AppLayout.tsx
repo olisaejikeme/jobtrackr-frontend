@@ -14,7 +14,7 @@ function AppLayout({ children }: Props) {
 
                 <nav className="space-y-2">
                     <NavLink
-                        to="/"
+                        to="/dashboard"
                         className={({ isActive }) =>
                             `block px-3 py-2 rounded ${isActive ? "bg-gray-700" : "hover:bg-gray-800"
                             }`
