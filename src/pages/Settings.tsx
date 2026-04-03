@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 function Settings() {
+    const { theme, toggleTheme } = useTheme();
+
     const [name, setName] = useState("Alexander Mitchell");
     const [email, setEmail] = useState("alex.mitchell@design.co");
 
@@ -9,50 +12,50 @@ function Settings() {
     const [confirmPassword, setConfirmPassword] = useState("");
 
     return (
-        <div className="p-6 max-w-4xl">
+        <div className="h-full flex flex-col p-8 max-w-4xl mx-auto bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
 
             {/* HEADER */}
-            <h1 className="text-xl font-semibold text-[#0F172A] mb-8">
-                Settings
-            </h1>
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-[#0F172A] dark:text-white tracking-tight">
+                    Settings
+                </h1>
+            </div>
 
             {/* PROFILE */}
             <div className="mb-10">
-                <p className="text-xs text-gray-500 mb-1">PROFILE</p>
-                <p className="text-sm text-gray-400 mb-6">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PROFILE</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">
                     Manage your personal information and public identity.
                 </p>
 
-                <div className="bg-white border border-gray-200 rounded-xl p-6">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
                     <div className="grid grid-cols-2 gap-8">
-
                         <div>
-                            <label className="text-xs text-gray-400">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                 FULL NAME
                             </label>
                             <input
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full mt-2 pb-2 border-b border-gray-300 outline-none focus:border-[#0F172A]"
+                                className="w-full mt-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                             />
                         </div>
 
                         <div>
-                            <label className="text-xs text-gray-400">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                 EMAIL
                             </label>
                             <input
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full mt-2 pb-2 border-b border-gray-300 outline-none focus:border-[#0F172A]"
+                                className="w-full mt-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                             />
                         </div>
-
                     </div>
 
                     <div className="flex justify-end mt-6">
-                        <button className="text-xs tracking-wider text-gray-600 hover:text-black">
-                            SAVE CHANGES
+                        <button className="px-5 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all">
+                            Save Changes
                         </button>
                     </div>
                 </div>
@@ -60,54 +63,54 @@ function Settings() {
 
             {/* PASSWORD */}
             <div className="mb-10">
-                <p className="text-xs text-gray-500 mb-1">CHANGE PASSWORD</p>
-                <p className="text-sm text-gray-400 mb-6">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">CHANGE PASSWORD</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">
                     Ensure your account is using a long, random password to stay secure.
                 </p>
 
-                <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-sm">
 
                     <div>
-                        <label className="text-xs text-gray-400">
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                             CURRENT PASSWORD
                         </label>
                         <input
                             type="password"
                             value={currentPassword}
                             onChange={(e) => setCurrentPassword(e.target.value)}
-                            className="w-full mt-2 pb-2 border-b border-gray-300 outline-none focus:border-[#0F172A]"
+                            className="w-full mt-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-8">
                         <div>
-                            <label className="text-xs text-gray-400">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                 NEW PASSWORD
                             </label>
                             <input
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full mt-2 pb-2 border-b border-gray-300 outline-none focus:border-[#0F172A]"
+                                className="w-full mt-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                             />
                         </div>
 
                         <div>
-                            <label className="text-xs text-gray-400">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                 CONFIRM NEW PASSWORD
                             </label>
                             <input
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full mt-2 pb-2 border-b border-gray-300 outline-none focus:border-[#0F172A]"
+                                className="w-full mt-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                             />
                         </div>
                     </div>
 
                     <div className="flex justify-end">
-                        <button className="bg-black text-white px-5 py-2 text-sm rounded-md hover:opacity-90">
-                            UPDATE PASSWORD
+                        <button className="px-6 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all">
+                            Update Password
                         </button>
                     </div>
                 </div>
@@ -115,30 +118,45 @@ function Settings() {
 
             {/* PREFERENCES */}
             <div>
-                <p className="text-xs text-gray-500 mb-1">PREFERENCES</p>
-                <p className="text-sm text-gray-400 mb-6">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PREFERENCES</p>
+                <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">
                     Customize your visual workspace and app behavior.
                 </p>
 
-                <div className="bg-white border border-gray-200 rounded-xl p-6 flex items-center justify-between">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex items-center justify-between shadow-sm">
 
                     <div>
-                        <p className="text-sm font-medium text-[#0F172A]">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">
                             Theme
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-slate-400 dark:text-slate-500">
                             Toggle between light and dark modes.
                         </p>
                     </div>
 
-                    {/* Toggle */}
-                    <div className="flex bg-gray-100 rounded-lg p-1 text-sm">
-                        <button className="px-3 py-1 bg-white rounded-md shadow-sm">
+                    {/* FUNCTIONAL TOGGLE */}
+                    <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 text-sm">
+
+                        <button
+                            onClick={() => theme === "dark" && toggleTheme()}
+                            className={`px-4 py-1.5 rounded-lg font-medium transition-all ${theme === "light"
+                                ? "bg-white text-slate-900 shadow-sm"
+                                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                                }`}
+                        >
                             ☀ Light
                         </button>
-                        <button className="px-3 py-1 text-gray-500">
+
+                        <button
+                            onClick={() => theme === "light" && toggleTheme()}
+                            className={`px-4 py-1.5 rounded-lg font-medium transition-all ${theme === "dark"
+                                ? "bg-slate-700 text-white shadow-sm"
+                                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                                }`}
+                        >
                             🌙 Dark
                         </button>
+
                     </div>
 
                 </div>
