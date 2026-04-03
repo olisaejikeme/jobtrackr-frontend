@@ -6,30 +6,44 @@ type ApiResponse<T> = {
     data: T;
 };
 
-type Application = {
+export type Application = {
     id: number;
     company_name: string;
     job_title: string;
+    location?: string;
     status: string;
-    application_date: string;
+    application_date?: string;
+    job_link?: string;
+    job_description?: string;
+    resume_id?: number;
+    notes?: string;
+};
+
+// Required fields for creation based on ApplicationBase
+export type ApplicationCreate = {
+    company_name: string;
+    job_title: string;
+    status: string;
+    location?: string;
+    application_date?: string;
+    job_link?: string;
+    job_description?: string;
+    resume_id?: number;
+    notes?: string;
 };
 
 export async function getApplications() {
-    const response = await apiRequest<ApiResponse<Application[]>>("/applications");
-
-    console.log(response);
-    return response;
+    return await apiRequest<ApiResponse<Application[]>>("/applications");
 }
 
-export async function createApplication(data: Omit<Application, 'id' | 'application_date'>) {
-    const response = await apiRequest<ApiResponse<Application>>("/applications", {
+export async function createApplication(data: ApplicationCreate) {
+    return await apiRequest<ApiResponse<Application>>("/applications", {
         method: "POST",
         body: JSON.stringify(data),
     });
-    return response;
 }
 
-export function updateApplication(id: number, data: any) {
+export function updateApplication(id: number, data: Partial<ApplicationCreate>) {
     return apiRequest(`/applications/${id}`, {
         method: "PUT",
         body: JSON.stringify(data),

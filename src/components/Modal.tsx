@@ -10,12 +10,11 @@ function Modal({ isOpen, onClose, children }: Props) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-96 relative">
-                {/* Close button */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/70 backdrop-blur-sm transition-all duration-300">
+            <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-xl animate-fadeIn border border-slate-100 dark:border-slate-800">
                 <button
                     onClick={onClose}
-                    className="absolute top-2 right-2 text-gray-500"
+                    className="absolute top-3 right-3 text-gray-400 dark:text-slate-500 hover:text-black dark:hover:text-white transition-colors"
                 >
                     ✕
                 </button>
