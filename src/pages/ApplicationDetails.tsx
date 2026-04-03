@@ -1,13 +1,27 @@
 import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
+interface ApplicationData {
+    title: string;
+    company: string;
+    location: string;
+    salary: string;
+    dateApplied: string;
+    workType: string;
+    status: string;
+    description: string;
+    responsibilities: string[];
+    resumeName: string;
+    resumeDate: string;
+}
+
 function ApplicationDetails() {
     const { id } = useParams();
 
     // 1. STATE MANAGEMENT
-    const [app, setApp] = useState(null);
+    const [app, setApp] = useState<ApplicationData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
     // 2. DATA FETCHING LOGIC
     useEffect(() => {
@@ -21,7 +35,7 @@ function ApplicationDetails() {
                 // MOCK DELAY & DATA
                 await new Promise(resolve => setTimeout(resolve, 500));
 
-                const mockData = {
+                const mockData: ApplicationData = {
                     title: "Senior Product Designer",
                     company: "TechFlow Inc.",
                     location: "San Francisco, CA (Hybrid)",
@@ -113,7 +127,7 @@ function ApplicationDetails() {
                                     </h4>
 
                                     <ul className="space-y-3">
-                                        {app.responsibilities?.map((item, i) => (
+                                        {app.responsibilities?.map((item: string, i: number) => (
                                             <li key={i} className="flex items-start gap-3">
                                                 <span className="text-blue-500 mt-1.5 text-[8px]">●</span>
                                                 {item}

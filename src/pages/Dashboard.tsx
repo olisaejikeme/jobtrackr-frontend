@@ -22,7 +22,7 @@ function Dashboard() {
 
     // Resume Logic States
     const [resumeMode, setResumeMode] = useState<"select" | "upload">("select");
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [_selectedFile, setSelectedFile] = useState<File | null>(null); // Prefixed with underscore
 
     // Form State
     const [formData, setFormData] = useState({

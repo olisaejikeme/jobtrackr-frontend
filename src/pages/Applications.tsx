@@ -17,21 +17,14 @@ import moreIcon from "../assets/icons/more.svg";
 import activeIcon from "../assets/icons/active-apps.svg";
 import interviewIcon from "../assets/icons/trend.svg";
 
-type Application = {
-    id: number;
-    company_name: string;
-    job_title: string;
-    status: string;
-    application_date: string;
-    location?: string;
-    notes?: string;
-};
+// Use the same type from the service to avoid mismatch
+import type { Application as ServiceApplication } from "../services/applicationService";
 
 function Applications() {
     const navigate = useNavigate();
 
     // --- STATE ---
-    const [applications, setApplications] = useState<Application[]>([]);
+    const [applications, setApplications] = useState<ServiceApplication[]>([]);
     const [resumes, setResumes] = useState<Resume[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,7 +33,7 @@ function Applications() {
 
     // Resume Logic States
     const [resumeMode, setResumeMode] = useState<"select" | "upload">("select");
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [_selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const [formData, setFormData] = useState({
         company_name: "",
@@ -228,7 +221,7 @@ function Applications() {
                                     {app.status}
                                 </span>
                                 <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
-                                    Applied {new Date(app.application_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    Applied {app.application_date ? new Date(app.application_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Date not set'}
                                 </span>
                             </div>
 
