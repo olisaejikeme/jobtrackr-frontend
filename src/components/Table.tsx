@@ -7,12 +7,20 @@ type Props = {
 
 function Table({ children, title }: Props) {
     return (
-        <div className="bg-white rounded-lg border p-4">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
             {title && (
-                <h3 className="text-sm font-semibold mb-4">{title}</h3>
+                <div className="px-6 py-4 border-b border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                        {title}
+                    </h3>
+                </div>
             )}
 
-            <table className="w-full text-sm">{children}</table>
+            <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                    {children}
+                </table>
+            </div>
         </div>
     );
 }
