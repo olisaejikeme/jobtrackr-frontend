@@ -16,7 +16,7 @@ type Resume = {
 
 function Resumes() {
     const [isUploadOpen, setIsUploadOpen] = useState(false);
-    const [resumes, setResumes] = useState<Resume[]>([]);
+    const [resumes, _setResumes] = useState<Resume[]>([]); // Prefixed with underscore
 
     const hasResumes = resumes.length > 0;
 
