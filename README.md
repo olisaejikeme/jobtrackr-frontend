@@ -26,7 +26,3 @@ https://jobtrackr-frontend-tan.vercel.app
 * Toast notifications and loading states
 
 ---
-
-```bash
-git clone [https://github.com/your-username/jobtrackr-frontend.git](https://github.com/your-username/jobtrackr-frontend.git)
-cd jobtrackr-frontend
