@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UploadResumeModal from "../components/UploadResumeModal";
+import { getResumes } from "../services/resumeService";
+import type { Resume as ApiResume } from "../services/resumeService";
 
 import FilterIcon from "../assets/icons/filter.svg";
 import TrashIcon from "../assets/icons/trash.svg";
 import FileIcon from "../assets/icons/pdf-file.svg";
 import UploadIcon from "../assets/icons/upload.svg";
 
+// Matching the UI needs with the API structure
 type Resume = {
     id: number;
     name: string;
@@ -16,7 +19,40 @@ type Resume = {
 
 function Resumes() {
     const [isUploadOpen, setIsUploadOpen] = useState(false);
-    const [resumes, _setResumes] = useState<Resume[]>([]); // Prefixed with underscore
+    const [resumes, setResumes] = useState<Resume[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const response = await getResumes();
+
+            // Check if status is true and data exists
+            if (response.status && Array.isArray(response.data)) {
+                const mappedResumes: Resume[] = response.data.map((r: ApiResume) => {
+                    // API returns uploaded_at. We handle the string formatting safely.
+                    const dateStr = r.uploaded_at || (r as any).created_at;
+
+                    return {
+                        id: r.id,
+                        name: r.file_name,
+                        size: "N/A", // API doesn't provide size yet
+                        uploaded_at: dateStr ? new Date(dateStr).toLocaleDateString() : "N/A",
+                        type: r.file_name.toLowerCase().endsWith(".pdf") ? "pdf" : "docx",
+                    };
+                });
+                setResumes(mappedResumes);
+            }
+        } catch (error) {
+            console.error("Failed to fetch resumes:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const hasResumes = resumes.length > 0;
 
@@ -72,7 +108,14 @@ function Resumes() {
             {/* TABLE / EMPTY STATE */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
 
-                {hasResumes ? (
+                {loading ? (
+                    <div className="flex-1 flex items-center justify-center text-slate-500">
+                        <div className="animate-pulse flex flex-col items-center gap-2">
+                            <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
+                            <span>Loading your resumes...</span>
+                        </div>
+                    </div>
+                ) : hasResumes ? (
                     <>
                         <div className="overflow-y-auto flex-1">
                             <table className="w-full text-left border-collapse">
@@ -172,7 +215,10 @@ function Resumes() {
 
             <UploadResumeModal
                 isOpen={isUploadOpen}
-                onClose={() => setIsUploadOpen(false)}
+                onClose={() => {
+                    setIsUploadOpen(false);
+                    fetchData(); // Refresh list after modal closes
+                }}
             />
         </div>
     );
