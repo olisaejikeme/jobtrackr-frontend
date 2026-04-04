@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { forgotPassword } from "../services/authService";
 import Toast from "../components/Toast";
-import { useTheme } from "../context/ThemeContext";
+// Removed unused useTheme import
 
 function ForgotPassword() {
-    const { theme, toggleTheme } = useTheme();
+    // Removed unused theme and toggleTheme
     const [email, setEmail] = useState("");
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
