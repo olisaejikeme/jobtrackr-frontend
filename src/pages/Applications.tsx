@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
+import Toast from "../components/Toast";
 import {
     getApplications,
-    createApplication,
     deleteApplication,
 } from "../services/applicationService";
 import { getResumes } from "../services/resumeService";
 import type { Resume } from "../services/resumeService";
-import Toast from "../components/Toast";
-import { useNavigate } from "react-router-dom";
+import type { Application as ServiceApplication } from "../services/applicationService";
 
 // Asset Imports
 import searchIcon from "../assets/icons/search.svg";
@@ -17,38 +17,36 @@ import moreIcon from "../assets/icons/more.svg";
 import activeIcon from "../assets/icons/active-apps.svg";
 import interviewIcon from "../assets/icons/trend.svg";
 
-type Application = {
-    id: number;
-    company_name: string;
-    job_title: string;
-    status: string;
-    application_date: string;
-    location?: string;
-    notes?: string;
-};
-
 function Applications() {
     const navigate = useNavigate();
 
     // --- STATE ---
-    const [applications, setApplications] = useState<Application[]>([]);
+    const [applications, setApplications] = useState<ServiceApplication[]>([]);
     const [resumes, setResumes] = useState<Resume[]>([]);
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<number | null>(null);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const [filter, setFilter] = useState("All");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortOrder, setSortOrder] = useState("Newest First");
 
     // Resume Logic States
     const [resumeMode, setResumeMode] = useState<"select" | "upload">("select");
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [_selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    // Form State
     const [formData, setFormData] = useState({
         company_name: "",
         job_title: "",
         status: "APPLIED",
         location: "",
         application_date: new Date().toISOString().split('T')[0],
-        resume_version: "",
+        job_link: "",
+        job_description: "",
+        resume_id: null as number | null,
         notes: ""
     });
 
@@ -58,21 +56,16 @@ function Applications() {
                 getApplications(),
                 getResumes()
             ]);
-
             const appsData = appsRes.data || [];
             const resumesData = resumesRes.data || [];
 
             setApplications(appsData);
             setResumes(resumesData);
 
-            // Logic: If no resumes exist, force upload mode
             if (resumesData.length === 0) {
                 setResumeMode("upload");
-            } else if (!formData.resume_version) {
-                setFormData(prev => ({ ...prev, resume_version: resumesData[0].file_name }));
             }
         } catch (error) {
-            console.error("Error fetching data:", error);
             setToast({ message: "Failed to load applications", type: "error" });
         }
     };
@@ -81,22 +74,6 @@ function Applications() {
         fetchData();
     }, []);
 
-    const handleCreate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            await createApplication(formData);
-            setToast({ message: "Application created successfully!", type: "success" });
-            setIsModalOpen(false);
-            fetchData();
-            resetForm();
-        } catch {
-            setToast({ message: "Error creating application", type: "error" });
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const resetForm = () => {
         setFormData({
             company_name: "",
@@ -104,37 +81,125 @@ function Applications() {
             status: "APPLIED",
             location: "",
             application_date: new Date().toISOString().split('T')[0],
-            resume_version: resumes[0]?.file_name || "",
+            job_link: "",
+            job_description: "",
+            resume_id: resumes[0]?.id || null,
             notes: ""
         });
         setSelectedFile(null);
+        setEditingId(null);
     };
 
-    const handleDelete = async (id: number) => {
-        if (!window.confirm("Are you sure you want to delete this application?")) return;
+    const handleOpenAddModal = () => {
+        resetForm();
+        setIsModalOpen(true);
+    };
+
+    const handleEditClick = (app: ServiceApplication) => {
+        setFormData({
+            company_name: app.company_name,
+            job_title: app.job_title,
+            status: app.status.toUpperCase(),
+            location: app.location || "",
+            application_date: app.application_date ? app.application_date.split('T')[0] : "",
+            job_link: app.job_link || "",
+            job_description: app.job_description || "",
+            resume_id: app.resume_id || null,
+            notes: app.notes || ""
+        });
+        setEditingId(app.id);
+        setResumeMode("select");
+        setIsModalOpen(true);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
         try {
-            await deleteApplication(id);
+            const formDataToSend = new FormData();
+            formDataToSend.append("company_name", formData.company_name);
+            formDataToSend.append("job_title", formData.job_title);
+            formDataToSend.append("status", formData.status);
+            if (formData.location) formDataToSend.append("location", formData.location);
+            if (formData.application_date) formDataToSend.append("application_date", formData.application_date);
+            if (formData.job_link) formDataToSend.append("job_link", formData.job_link);
+            if (formData.job_description) formDataToSend.append("job_description", formData.job_description);
+            if (formData.resume_id) formDataToSend.append("resume_id", String(formData.resume_id));
+            if (formData.notes) formDataToSend.append("notes", formData.notes);
+            if (_selectedFile) formDataToSend.append("file", _selectedFile);
+
+            const token = localStorage.getItem("access_token");
+            const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+            const url = editingId ? `${BASE_URL}/applications/${editingId}` : `${BASE_URL}/applications`;
+            const method = editingId ? "PUT" : "POST";
+
+            const response = await fetch(url, {
+                method: method,
+                headers: { Authorization: token ? `Bearer ${token}` : "" },
+                body: formDataToSend,
+            });
+
+            if (!response.ok) throw new Error("Submission failed");
+
+            setToast({ message: editingId ? "Application updated!" : "Application tracked!", type: "success" });
+            setIsModalOpen(false);
+            await fetchData();
+            resetForm();
+        } catch (error) {
+            setToast({ message: "Check required fields and try again.", type: "error" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // --- DELETE LOGIC ---
+    const handleDeleteClick = (id: number) => {
+        setIdToDelete(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleExecuteDelete = async () => {
+        if (!idToDelete) return;
+        try {
+            await deleteApplication(idToDelete);
             setToast({ message: "Deleted successfully", type: "success" });
             fetchData();
         } catch {
             setToast({ message: "Failed to delete", type: "error" });
+        } finally {
+            setIsDeleteModalOpen(false);
+            setIdToDelete(null);
         }
     };
 
     function getStatusBadgeStyle(status: string) {
-        switch (status.toLowerCase()) {
-            case "interview": return "bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 border-orange-100 dark:border-orange-900";
-            case "offer": return "bg-green-50 dark:bg-green-950/50 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900";
-            case "rejected": return "bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900";
+        switch (status.toUpperCase()) {
+            case "INTERVIEW": return "bg-orange-50 dark:bg-orange-950/50 text-orange-600 dark:text-orange-400 border-orange-100 dark:border-orange-900";
+            case "OFFER": return "bg-green-50 dark:bg-green-950/50 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900";
+            case "REJECTED": return "bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900";
             default: return "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900";
         }
     }
 
-    const interviewCount = applications.filter(a => a.status.toLowerCase() === "interview").length;
+    const filteredApplications = applications
+        .filter(app => {
+            const matchesSearch = app.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                app.job_title.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesTab = filter === "All" || app.status.toUpperCase() === filter.toUpperCase();
+            return matchesSearch && matchesTab;
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.application_date || 0).getTime();
+            const dateB = new Date(b.application_date || 0).getTime();
+            return sortOrder === "Newest First" ? dateB - dateA : dateA - dateB;
+        });
+
+    const interviewCount = applications.filter(a => a.status.toUpperCase() === "INTERVIEW").length;
 
     return (
         <div className="h-full flex flex-col p-8 max-w-7xl mx-auto bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
-            {/* HEADER AREA */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 shrink-0">
                 <div>
                     <h1 className="text-3xl font-bold text-[#0F172A] dark:text-white tracking-tight">My Applications</h1>
@@ -143,7 +208,7 @@ function Applications() {
 
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => setIsModalOpen(true)}
+                        onClick={handleOpenAddModal}
                         className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-200 dark:shadow-blue-900/30 transition-all flex items-center gap-2"
                     >
                         <span className="text-lg">+</span> New Application
@@ -162,10 +227,11 @@ function Applications() {
                 </div>
             </div>
 
-            {/* FILTER BAR */}
             <div className="flex flex-col lg:flex-row items-center gap-4 mb-8 shrink-0">
                 <div className="relative flex-1 w-full">
                     <input
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         placeholder="Search by title or company..."
                         className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 dark:focus:border-blue-500 transition-all shadow-sm dark:text-white dark:placeholder:text-slate-500"
                     />
@@ -174,7 +240,11 @@ function Applications() {
 
                 <div className="flex items-center gap-3 w-full lg:w-auto">
                     <div className="relative">
-                        <select className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 pl-4 pr-10 py-3 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-300 outline-none shadow-sm cursor-pointer appearance-none min-w-[140px]">
+                        <select
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(e.target.value)}
+                            className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 pl-4 pr-10 py-3 rounded-2xl text-sm font-medium text-slate-600 dark:text-slate-300 outline-none shadow-sm cursor-pointer appearance-none min-w-[140px]"
+                        >
                             <option>Newest First</option>
                             <option>Oldest First</option>
                         </select>
@@ -182,7 +252,7 @@ function Applications() {
                     </div>
 
                     <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl">
-                        {["All", "Applied", "Interviewing", "Offer", "Rejected"].map((tab) => (
+                        {["All", "Applied", "Interview", "Offer", "Rejected"].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setFilter(tab)}
@@ -198,10 +268,9 @@ function Applications() {
                 </div>
             </div>
 
-            {/* MAIN CONTENT AREA */}
-            {applications.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8">
-                    {applications.map(app => (
+            {filteredApplications.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 overflow-y-auto">
+                    {filteredApplications.map(app => (
                         <div key={app.id} className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all relative">
                             <div className="flex justify-between items-start mb-4">
                                 <div className="flex items-center gap-4">
@@ -213,12 +282,25 @@ function Applications() {
                                         <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{app.company_name}</p>
                                     </div>
                                 </div>
+
                                 <div className="relative group/menu">
                                     <button className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
                                         <img src={moreIcon} className="w-5 h-5 opacity-40 dark:opacity-30" alt="options" />
                                     </button>
-                                    <div className="hidden group-hover/menu:block absolute right-0 top-10 w-32 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-xl rounded-2xl py-2 z-20">
-                                        <button onClick={() => handleDelete(app.id)} className="w-full text-left px-4 py-2 text-xs text-red-500 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-950/50">Delete</button>
+                                    <div className="invisible group-hover/menu:visible absolute right-0 top-10 w-36 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl rounded-2xl py-2 z-20">
+                                        <button
+                                            onClick={() => handleEditClick(app)}
+                                            className="w-full text-left px-4 py-2 text-[11px] text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-50 dark:hover:bg-slate-700"
+                                        >
+                                            Edit Details
+                                        </button>
+                                        <div className="h-px bg-slate-100 dark:bg-slate-700 my-1" />
+                                        <button
+                                            onClick={() => handleDeleteClick(app.id!)}
+                                            className="w-full text-left px-4 py-2 text-[11px] text-red-500 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-950/50"
+                                        >
+                                            Delete
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -228,7 +310,7 @@ function Applications() {
                                     {app.status}
                                 </span>
                                 <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
-                                    Applied {new Date(app.application_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    Applied {app.application_date ? new Date(app.application_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Today'}
                                 </span>
                             </div>
 
@@ -249,32 +331,61 @@ function Applications() {
                             <img src={activeIcon} className="w-10 h-10 -rotate-12 opacity-60 dark:opacity-40" alt="empty" />
                         </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">No applications tracked yet</h2>
+                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">No applications found</h2>
                     <p className="text-slate-500 dark:text-slate-400 text-sm max-w-sm mb-10 leading-relaxed">
-                        Your career journey starts here. Add your first job application to begin tracking your progress and insights.
+                        {searchTerm || filter !== "All"
+                            ? "Try adjusting your search or filters to find what you're looking for."
+                            : "Your career journey starts here. Add your first job application to begin tracking your progress."}
                     </p>
-                    <button onClick={() => setIsModalOpen(true)} className="bg-[#2563EB] text-white px-10 py-4 rounded-2xl text-sm font-bold shadow-xl shadow-blue-200 dark:shadow-blue-900/30 hover:bg-blue-700 transition-all transform active:scale-95">
+                    <button onClick={handleOpenAddModal} className="bg-[#2563EB] text-white px-10 py-4 rounded-2xl text-sm font-bold shadow-xl shadow-blue-200 dark:shadow-blue-900/30 hover:bg-blue-700 transition-all transform active:scale-95">
                         + Add Job Application
                     </button>
                 </div>
             )}
 
-            {/* MODAL - EXACT SAME AS DASHBOARD */}
+            {/* DELETE CONFIRMATION MODAL */}
+            <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
+                <div className="p-2">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Delete Application</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
+                        Are you sure you want to delete this application? This action cannot be undone.
+                    </p>
+                    <div className="flex justify-end gap-3">
+                        <button
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="px-5 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleExecuteDelete}
+                            className="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-red-200 dark:shadow-none"
+                        >
+                            Delete Permanently
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* FORM MODAL */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
                 <div className="mb-6">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">New Application</h2>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Log your latest job application details.</p>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                        {editingId ? "Edit Application" : "New Application"}
+                    </h2>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">
+                        {editingId ? "Update your job application details." : "Log your latest job application details."}
+                    </p>
                 </div>
 
-                <form onSubmit={handleCreate} className="space-y-5">
-                    {/* Company and Job Title */}
+                <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company</label>
                             <input
                                 required
                                 className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
-                                placeholder="e.g. Google"
+                                placeholder="Apple"
                                 value={formData.company_name}
                                 onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
                             />
@@ -284,14 +395,13 @@ function Applications() {
                             <input
                                 required
                                 className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
-                                placeholder="Software Engineer"
+                                placeholder="UX Designer"
                                 value={formData.job_title}
                                 onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
                             />
                         </div>
                     </div>
 
-                    {/* Status and Location */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status</label>
@@ -307,20 +417,51 @@ function Applications() {
                             </select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Location</label>
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Application Date</label>
                             <input
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
-                                placeholder="Remote / New York"
-                                value={formData.location}
-                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                type="date"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white"
+                                value={formData.application_date}
+                                onChange={(e) => setFormData({ ...formData, application_date: e.target.value })}
                             />
                         </div>
                     </div>
 
-                    {/* Resume Section with Toggle */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Location (Optional)</label>
+                            <input
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                placeholder="Hybrid / Remote"
+                                value={formData.location}
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Link (Optional)</label>
+                            <input
+                                type="url"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                placeholder="https://linkedin.com/..."
+                                value={formData.job_link}
+                                onChange={(e) => setFormData({ ...formData, job_link: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Description (Optional)</label>
+                        <textarea
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none min-h-[80px] resize-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                            placeholder="Paste requirements or job summary here..."
+                            value={formData.job_description}
+                            onChange={(e) => setFormData({ ...formData, job_description: e.target.value })}
+                        />
+                    </div>
+
                     <div className="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3">
                         <div className="flex justify-between items-center">
-                            <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Resume Document</label>
+                            <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Resume Document (Optional)</label>
                             <div className="flex p-1 bg-slate-200/50 dark:bg-slate-700 rounded-lg">
                                 <button
                                     type="button"
@@ -348,40 +489,35 @@ function Applications() {
                         {resumeMode === "select" && resumes.length > 0 ? (
                             <select
                                 className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
-                                value={formData.resume_version}
-                                onChange={(e) => setFormData({ ...formData, resume_version: e.target.value })}
+                                value={formData.resume_id || ""}
+                                onChange={(e) => setFormData({ ...formData, resume_id: Number(e.target.value) })}
                             >
-                                <option value="" disabled>Choose a resume...</option>
-                                {resumes.map(r => <option key={r.id} value={r.file_name}>{r.file_name}</option>)}
+                                <option value="">No Resume Selected</option>
+                                {resumes.map(r => <option key={r.id} value={r.id}>{r.file_name}</option>)}
                             </select>
                         ) : (
                             <input
                                 type="file"
-                                className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600"
+                                className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 dark:text-slate-400"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
-                                    if (file) {
-                                        setSelectedFile(file);
-                                        setFormData({ ...formData, resume_version: file.name });
-                                    }
+                                    if (file) setSelectedFile(file);
                                 }}
                             />
                         )}
                     </div>
 
-                    {/* Notes Section */}
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Notes (Optional)</label>
                         <textarea
                             className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none min-h-[70px] resize-none transition-all dark:text-white dark:placeholder:text-slate-500"
-                            placeholder="Referral from John Doe..."
+                            placeholder="Referral from..."
                             value={formData.notes}
                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                         />
                     </div>
 
-                    {/* Footer Actions */}
-                    <div className="flex justify-end gap-3 pt-2">
+                    <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-white dark:bg-slate-900 pb-2">
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(false)}
@@ -394,7 +530,7 @@ function Applications() {
                             type="submit"
                             className="px-8 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? "Processing..." : "Track Application"}
+                            {loading ? "Processing..." : editingId ? "Update Application" : "Track Application"}
                         </button>
                     </div>
                 </form>

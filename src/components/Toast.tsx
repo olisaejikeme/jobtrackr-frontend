@@ -18,7 +18,7 @@ function Toast({ message, type = "success", onClose }: Props) {
     };
 
     return (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-100 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] animate-in fade-in slide-in-from-top-4 duration-300">
             <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl text-white shadow-2xl ${styles[type]}`}>
                 {type === "success" ? (
                     <span className="text-lg">✓</span>

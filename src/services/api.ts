@@ -1,49 +1,34 @@
-const BASE_URL = "http://127.0.0.1:8000/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function apiRequest<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
 
-    // Log the request details
-    console.log("=== API Request ===");
-    console.log("Endpoint:", `${BASE_URL}${endpoint}`);
-    console.log("Method:", options?.method || "GET");
-    console.log("Headers:", {
-        "Content-Type": "application/json",
+    const headers: Record<string, string> = {
         Authorization: token ? `Bearer ${token}` : "",
-        ...(options?.headers || {}),
-    });
+        ...(options?.headers as Record<string, string> || {}),
+    };
 
-    if (options?.body) {
-        console.log("Body:", options.body);
-        console.log("Parsed Body:", JSON.parse(options.body as string));
+    // If we are NOT sending FormData, we MUST specify application/json
+    if (!(options?.body instanceof FormData)) {
+        headers["Content-Type"] = "application/json";
     }
 
-    try {
-        const response = await fetch(`${BASE_URL}${endpoint}`, {
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: token ? `Bearer ${token}` : "",
-                ...(options?.headers || {}),
-            },
-            ...options,
-        });
+    const fetchOptions = {
+        ...options,
+        headers,
+    };
 
-        console.log("Response Status:", response.status);
+    const response = await fetch(`${BASE_URL}${endpoint}`, fetchOptions);
 
-        // Try to get error details
-        const responseData = await response.json().catch(async () => {
-            return { error: await response.text() };
-        });
+    // Standard 401/Unauthorized logic would go here
 
-        console.log("Response Data:", responseData);
+    const responseData = await response.json().catch(() => ({}));
 
-        if (!response.ok) {
-            throw new Error(JSON.stringify(responseData));
-        }
-
-        return responseData as T;
-    } catch (error) {
-        console.error("API Error:", error);
-        throw error;
+    if (!response.ok) {
+        // This will log the "Field required" details to your console
+        console.error("API Error Response:", responseData);
+        throw new Error(JSON.stringify(responseData));
     }
+
+    return responseData as T;
 }
