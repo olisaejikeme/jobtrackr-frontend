@@ -26,7 +26,10 @@ function AppLayout({ children }: Props) {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
+        // FIX: Match the key used in Login and ProtectedRoute
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
         navigate("/login");
     };
 

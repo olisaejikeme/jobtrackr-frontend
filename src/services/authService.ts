@@ -11,6 +11,7 @@ interface User {
 interface LoginResponse {
     data: {
         access_token: string;
+        refresh_token: string;
         token_type?: string;
         user?: User;
     };
@@ -37,25 +38,41 @@ interface RegisterData {
 }
 
 export async function login(data: { email: string; password: string }): Promise<LoginResponse> {
-    console.log("Login called with:", { email: data.email });
+    const response = await apiRequest<LoginResponse>("/auth/login", {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
+
+    if (response.data) {
+        localStorage.setItem("access_token", response.data.access_token);
+        localStorage.setItem("refresh_token", response.data.refresh_token);
+    }
+    return response;
+}
+
+export async function refreshToken(): Promise<string | null> {
+    const refresh_token = localStorage.getItem("refresh_token");
+    if (!refresh_token) return null;
 
     try {
-        const response = await apiRequest<LoginResponse>("/auth/login", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
             method: "POST",
-            body: JSON.stringify(data),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token }),
         });
 
-        console.log("Login response:", response);
+        if (!response.ok) throw new Error("Refresh failed");
 
-        // Optional: Store token immediately
-        if (response.data?.access_token) {
-            localStorage.setItem("token", response.data.access_token);
-        }
+        const result = await response.json();
+        const { access_token, refresh_token: new_refresh } = result.data;
 
-        return response;
-    } catch (error) {
-        console.error("Login API error:", error);
-        throw error;
+        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("refresh_token", new_refresh);
+
+        return access_token;
+    } catch (err) {
+        logout();
+        return null;
     }
 }
 
@@ -82,10 +99,46 @@ export async function register(data: RegisterData): Promise<RegisterResponse> {
     }
 }
 
+export async function forgotPassword(email: string) {
+    return await apiRequest("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+    });
+}
+
+export async function resetPassword(password: string, token: string) {
+    return await apiRequest("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ password, token }),
+    });
+}
+
+export const changePassword = async (passwords: any) => {
+    const token = localStorage.getItem("access_token");
+    const response = await fetch("http://localhost:8000/auth/change-password", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            current_password: passwords.currentPassword,
+            new_password: passwords.newPassword
+        }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || "Failed to update password");
+    }
+    return response.json();
+};
+
 // Helper function to logout
 export function logout(): void {
-    localStorage.removeItem("token");
-    console.log("User logged out");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "/login";
 }
 
 // Helper function to check if user is authenticated
