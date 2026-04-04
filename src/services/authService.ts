@@ -37,6 +37,18 @@ interface RegisterData {
     password_confirmation?: string;
 }
 
+interface ApiResponse<T> {
+    data: T;
+    message: string;
+    status: boolean;
+    status_code: number;
+}
+
+interface ChangePasswordData {
+    currentPassword: string;
+    newPassword: string;
+}
+
 export async function login(data: { email: string; password: string }): Promise<LoginResponse> {
     const response = await apiRequest<LoginResponse>("/auth/login", {
         method: "POST",
@@ -55,7 +67,8 @@ export async function refreshToken(): Promise<string | null> {
     if (!refresh_token) return null;
 
     try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
+        const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+        const response = await fetch(`${BASE_URL}/auth/refresh`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refresh_token }),
@@ -89,7 +102,7 @@ export async function register(data: RegisterData): Promise<RegisterResponse> {
 
         // Optional: Store token if returned immediately after registration
         if (response.data?.access_token) {
-            localStorage.setItem("token", response.data.access_token);
+            localStorage.setItem("access_token", response.data.access_token);
         }
 
         return response;
@@ -113,9 +126,11 @@ export async function resetPassword(password: string, token: string) {
     });
 }
 
-export const changePassword = async (passwords: any) => {
+export async function changePassword(passwords: ChangePasswordData) {
     const token = localStorage.getItem("access_token");
-    const response = await fetch("http://localhost:8000/auth/change-password", {
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+    const response = await fetch(`${BASE_URL}/auth/change-password`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -132,7 +147,20 @@ export const changePassword = async (passwords: any) => {
         throw new Error(error.detail || "Failed to update password");
     }
     return response.json();
-};
+}
+
+export async function getUserMe(): Promise<ApiResponse<User>> {
+    return await apiRequest<ApiResponse<User>>("/users/me", {
+        method: "GET",
+    });
+}
+
+export async function updateProfile(data: { name?: string; email?: string }): Promise<ApiResponse<User>> {
+    return await apiRequest<ApiResponse<User>>("/users/me", {
+        method: "PATCH",
+        body: JSON.stringify(data),
+    });
+}
 
 // Helper function to logout
 export function logout(): void {
@@ -143,11 +171,11 @@ export function logout(): void {
 
 // Helper function to check if user is authenticated
 export function isAuthenticated(): boolean {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
     return !!token;
 }
 
 // Helper function to get the current token
 export function getToken(): string | null {
-    return localStorage.getItem("token");
+    return localStorage.getItem("access_token");
 }
