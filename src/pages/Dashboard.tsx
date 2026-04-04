@@ -22,16 +22,18 @@ function Dashboard() {
 
     // Resume Logic States
     const [resumeMode, setResumeMode] = useState<"select" | "upload">("select");
-    const [_selectedFile, setSelectedFile] = useState<File | null>(null); // Prefixed with underscore
+    const [_selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    // Form State
+    // Form State updated with ApplicationBase fields
     const [formData, setFormData] = useState({
         company_name: "",
         job_title: "",
         status: "APPLIED",
         location: "",
         application_date: new Date().toISOString().split('T')[0],
-        resume_version: "",
+        job_link: "",
+        job_description: "",
+        resume_id: null as number | null,
         notes: ""
     });
 
@@ -48,11 +50,10 @@ function Dashboard() {
             setApplications(appsData);
             setResumes(resumesData);
 
-            // Logic: If no resumes exist, force upload mode
             if (resumesData.length === 0) {
                 setResumeMode("upload");
-            } else if (!formData.resume_version) {
-                setFormData(prev => ({ ...prev, resume_version: resumesData[0].file_name }));
+            } else if (!formData.resume_id) {
+                setFormData(prev => ({ ...prev, resume_id: resumesData[0].id }));
             }
         } catch (error) {
             console.error("Error fetching dashboard data:", error);
@@ -67,7 +68,12 @@ function Dashboard() {
         e.preventDefault();
         setLoading(true);
         try {
-            await createApplication(formData);
+            // If date is empty string for some reason, default to today
+            const submissionData = {
+                ...formData,
+                application_date: formData.application_date || new Date().toISOString().split('T')[0]
+            };
+            await createApplication(submissionData);
             await fetchData();
             setIsModalOpen(false);
             setToast({ message: "Application tracked successfully!", type: "success" });
@@ -86,7 +92,9 @@ function Dashboard() {
             status: "APPLIED",
             location: "",
             application_date: new Date().toISOString().split('T')[0],
-            resume_version: resumes[0]?.file_name || "",
+            job_link: "",
+            job_description: "",
+            resume_id: resumes[0]?.id || null,
             notes: ""
         });
         setSelectedFile(null);
@@ -202,7 +210,7 @@ function Dashboard() {
                     <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Log your latest job application details.</p>
                 </div>
 
-                <form onSubmit={handleAddApplication} className="space-y-5">
+                <form onSubmit={handleAddApplication} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company</label>
@@ -241,7 +249,19 @@ function Dashboard() {
                             </select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Location</label>
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Application Date</label>
+                            <input
+                                type="date"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white"
+                                value={formData.application_date}
+                                onChange={(e) => setFormData({ ...formData, application_date: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Location (Optional)</label>
                             <input
                                 className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
                                 placeholder="Hybrid / Remote"
@@ -249,12 +269,32 @@ function Dashboard() {
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                             />
                         </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Link (Optional)</label>
+                            <input
+                                type="url"
+                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                placeholder="https://linkedin.com/..."
+                                value={formData.job_link}
+                                onChange={(e) => setFormData({ ...formData, job_link: e.target.value })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Description (Optional)</label>
+                        <textarea
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none min-h-[80px] resize-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                            placeholder="Paste requirements or job summary here..."
+                            value={formData.job_description}
+                            onChange={(e) => setFormData({ ...formData, job_description: e.target.value })}
+                        />
                     </div>
 
                     {/* Resume Section */}
                     <div className="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3">
                         <div className="flex justify-between items-center">
-                            <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Resume Document</label>
+                            <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Resume Document (Optional)</label>
                             <div className="flex p-1 bg-slate-200/50 dark:bg-slate-700 rounded-lg">
                                 <button
                                     type="button"
@@ -282,10 +322,11 @@ function Dashboard() {
                         {resumeMode === "select" && resumes.length > 0 ? (
                             <select
                                 className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
-                                value={formData.resume_version}
-                                onChange={(e) => setFormData({ ...formData, resume_version: e.target.value })}
+                                value={formData.resume_id || ""}
+                                onChange={(e) => setFormData({ ...formData, resume_id: Number(e.target.value) })}
                             >
-                                {resumes.map(r => <option key={r.id} value={r.file_name}>{r.file_name}</option>)}
+                                <option value="">No Resume Selected</option>
+                                {resumes.map(r => <option key={r.id} value={r.id}>{r.file_name}</option>)}
                             </select>
                         ) : (
                             <input
@@ -295,7 +336,7 @@ function Dashboard() {
                                     const file = e.target.files?.[0];
                                     if (file) {
                                         setSelectedFile(file);
-                                        setFormData({ ...formData, resume_version: file.name });
+                                        // In a real scenario, you'd upload first to get an ID
                                     }
                                 }}
                             />
@@ -312,7 +353,7 @@ function Dashboard() {
                         />
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-2">
+                    <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-white dark:bg-slate-900 pb-2">
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(false)}
