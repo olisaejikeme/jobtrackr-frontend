@@ -26,3 +26,6 @@ https://jobtrackr-frontend-tan.vercel.app
 * Toast notifications and loading states
 
 ---
+
+## License
+This project is proprietary and not licensed for commercial use.
