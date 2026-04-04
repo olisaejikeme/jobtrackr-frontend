@@ -70,17 +70,17 @@ function Settings() {
 
         // Basic Validation
         if (!currentPassword || !newPassword || !confirmPassword) {
-            setToast({ text: "All password fields are required.", type: "error" });
+            setToast({ message: "All password fields are required.", type: "error" }); // Fixed: changed 'text' to 'message'
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            setToast({ text: "New passwords do not match.", type: "error" });
+            setToast({ message: "New passwords do not match.", type: "error" }); // Fixed: changed 'text' to 'message'
             return;
         }
 
         if (newPassword.length < 8) {
-            setToast({ text: "Password must be at least 8 characters long.", type: "error" });
+            setToast({ message: "Password must be at least 8 characters long.", type: "error" }); // Fixed: changed 'text' to 'message'
             return;
         }
 

@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { apiRequest } from "../services/api";
 import { deleteApplication, updateApplication } from "../services/applicationService";
 import TrashIcon from "../assets/icons/trash.svg";
