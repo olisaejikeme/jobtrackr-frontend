@@ -1,55 +1,122 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { changePassword } from "../services/authService";
+import { changePassword, getUserMe, updateProfile } from "../services/authService";
+import Toast from "../components/Toast";
 
 function Settings() {
     const { theme, toggleTheme } = useTheme();
 
-    const [name, setName] = useState("Alexander Mitchell");
-    const [email, setEmail] = useState("alex.mitchell@design.co");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [profileLoading, setProfileLoading] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
     // Password States
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordLoading, setPasswordLoading] = useState(false);
 
-    // UI Feedback States
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+    // Fetch user data on component mount
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                setLoading(true);
+                const response = await getUserMe();
+                if (response.status && response.data) {
+                    setName(response.data.name);
+                    setEmail(response.data.email);
+                }
+            } catch (error) {
+                console.error("Failed to fetch user data:", error);
+                setToast({ message: "Failed to load user profile", type: "error" });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    const handleProfileUpdate = async () => {
+        setProfileLoading(true);
+        setToast(null);
+
+        try {
+            const response = await updateProfile({ name, email });
+
+            if (response.status) {
+                setToast({ message: "Profile updated successfully!", type: "success" });
+                // Update local state with the response data
+                if (response.data) {
+                    setName(response.data.name);
+                    setEmail(response.data.email);
+                }
+            } else {
+                setToast({ message: response.message || "Failed to update profile", type: "error" });
+            }
+        } catch (error: any) {
+            console.error("Profile update error:", error);
+            setToast({ message: error.message || "An error occurred while updating profile", type: "error" });
+        } finally {
+            setProfileLoading(false);
+        }
+    };
 
     const handlePasswordUpdate = async () => {
         // Reset message
-        setMessage(null);
+        setToast(null);
 
         // Basic Validation
         if (!currentPassword || !newPassword || !confirmPassword) {
-            setMessage({ text: "All password fields are required.", type: "error" });
+            setToast({ text: "All password fields are required.", type: "error" });
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            setMessage({ text: "New passwords do not match.", type: "error" });
+            setToast({ text: "New passwords do not match.", type: "error" });
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            setToast({ text: "Password must be at least 8 characters long.", type: "error" });
             return;
         }
 
         try {
-            setLoading(true);
+            setPasswordLoading(true);
             await changePassword({ currentPassword, newPassword });
 
-            setMessage({ text: "Password updated successfully!", type: "success" });
+            setToast({ message: "Password updated successfully!", type: "success" });
             // Clear inputs on success
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
         } catch (err: any) {
-            setMessage({ text: err.message || "Failed to update password", type: "error" });
+            setToast({ message: err.message || "Failed to update password", type: "error" });
         } finally {
-            setLoading(false);
+            setPasswordLoading(false);
         }
     };
 
+    if (loading) {
+        return (
+            <div className="h-full flex flex-col p-8 max-w-4xl mx-auto bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
+                <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-slate-500 dark:text-slate-400">Loading profile...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="h-full flex flex-col p-8 max-w-4xl mx-auto bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
+            {/* TOAST NOTIFICATION */}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* HEADER */}
             <div className="mb-8">
@@ -58,7 +125,7 @@ function Settings() {
                 </h1>
             </div>
 
-            {/* PROFILE (Static for now) */}
+            {/* PROFILE */}
             <div className="mb-10">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">PROFILE</p>
                 <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">
@@ -75,6 +142,7 @@ function Settings() {
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full mt-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                placeholder="Enter your full name"
                             />
                         </div>
 
@@ -83,22 +151,28 @@ function Settings() {
                                 EMAIL
                             </label>
                             <input
+                                type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="w-full mt-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                placeholder="Enter your email"
                             />
                         </div>
                     </div>
 
                     <div className="flex justify-end mt-6">
-                        <button className="px-5 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all">
-                            Save Changes
+                        <button
+                            onClick={handleProfileUpdate}
+                            disabled={profileLoading}
+                            className="px-5 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {profileLoading ? "Saving..." : "Save Changes"}
                         </button>
                     </div>
                 </div>
             </div>
 
-            {/* PASSWORD (UPDATED) */}
+            {/* PASSWORD */}
             <div className="mb-10">
                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 uppercase font-bold tracking-wider">Change Password</p>
                 <p className="text-sm text-slate-400 dark:text-slate-500 mb-6">
@@ -106,12 +180,6 @@ function Settings() {
                 </p>
 
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-6 shadow-sm">
-                    {message && (
-                        <div className={`p-3 rounded-lg text-xs font-bold ${message.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
-                            {message.text}
-                        </div>
-                    )}
-
                     <div>
                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                             CURRENT PASSWORD
@@ -153,10 +221,10 @@ function Settings() {
                     <div className="flex justify-end">
                         <button
                             onClick={handlePasswordUpdate}
-                            disabled={loading}
+                            disabled={passwordLoading}
                             className="px-6 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? "Updating..." : "Update Password"}
+                            {passwordLoading ? "Updating..." : "Update Password"}
                         </button>
                     </div>
                 </div>

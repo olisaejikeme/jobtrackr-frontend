@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import UploadResumeModal from "../components/UploadResumeModal";
-import { getResumes } from "../services/resumeService";
+import { getResumes, deleteResume } from "../services/resumeService";
 import type { Resume as ApiResume } from "../services/resumeService";
 
 import FilterIcon from "../assets/icons/filter.svg";
@@ -8,7 +8,6 @@ import TrashIcon from "../assets/icons/trash.svg";
 import FileIcon from "../assets/icons/pdf-file.svg";
 import UploadIcon from "../assets/icons/upload.svg";
 
-// Matching the UI needs with the API structure
 type Resume = {
     id: number;
     name: string;
@@ -27,16 +26,14 @@ function Resumes() {
             setLoading(true);
             const response = await getResumes();
 
-            // Check if status is true and data exists
             if (response.status && Array.isArray(response.data)) {
                 const mappedResumes: Resume[] = response.data.map((r: ApiResume) => {
-                    // API returns uploaded_at. We handle the string formatting safely.
-                    const dateStr = r.uploaded_at || (r as any).created_at;
+                    const dateStr = r.uploaded_at || r.created_at;
 
                     return {
                         id: r.id,
                         name: r.file_name,
-                        size: "N/A", // API doesn't provide size yet
+                        size: "N/A",
                         uploaded_at: dateStr ? new Date(dateStr).toLocaleDateString() : "N/A",
                         type: r.file_name.toLowerCase().endsWith(".pdf") ? "pdf" : "docx",
                     };
@@ -47,6 +44,16 @@ function Resumes() {
             console.error("Failed to fetch resumes:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: number) => {
+        if (!window.confirm("Are you sure you want to delete this resume?")) return;
+        try {
+            await deleteResume(id);
+            setResumes(prev => prev.filter(r => r.id !== id));
+        } catch (error) {
+            console.error("Delete failed:", error);
         }
     };
 
@@ -139,7 +146,6 @@ function Resumes() {
                                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                                     {resumes.map((resume) => (
                                         <tr key={resume.id} className="group hover:bg-slate-50/30 dark:hover:bg-slate-800/40 transition-colors">
-
                                             <td className="py-5 px-8">
                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${resume.type === 'pdf'
                                                     ? 'bg-red-50 dark:bg-red-950/40'
@@ -163,7 +169,10 @@ function Resumes() {
                                             </td>
 
                                             <td className="py-5 px-8 text-right">
-                                                <button className="p-2.5 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors group/btn">
+                                                <button
+                                                    onClick={() => handleDelete(resume.id)}
+                                                    className="p-2.5 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors group/btn"
+                                                >
                                                     <img src={TrashIcon} alt="delete" className="w-5 h-5 opacity-30 dark:opacity-40 group-hover/btn:opacity-100 transition-opacity" />
                                                 </button>
                                             </td>
@@ -215,10 +224,8 @@ function Resumes() {
 
             <UploadResumeModal
                 isOpen={isUploadOpen}
-                onClose={() => {
-                    setIsUploadOpen(false);
-                    fetchData(); // Refresh list after modal closes
-                }}
+                onClose={() => setIsUploadOpen(false)}
+                onSuccess={fetchData}
             />
         </div>
     );
