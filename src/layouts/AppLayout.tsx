@@ -1,13 +1,11 @@
 import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useTheme } from "../context/ThemeContext";
 import { getUserMe } from "../services/authService";
 
 type Props = { children: ReactNode };
 
 function AppLayout({ children }: Props) {
-    const { theme, toggleTheme } = useTheme();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [user, setUser] = useState({ name: "Loading...", email: "" });
     const navigate = useNavigate();
