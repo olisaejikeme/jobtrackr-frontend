@@ -45,7 +45,7 @@ function UploadResumeModal({ isOpen, onClose, onSuccess }: Props) {
 
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl p-10 mx-4 relative border border-transparent dark:border-slate-800 transition-colors">
+            <div className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-[24px] md:rounded-[32px] shadow-2xl p-6 md:p-10 mx-4 relative border border-transparent dark:border-slate-800 transition-colors">
                 <div className="flex justify-between items-start mb-8">
                     <div>
                         <h2 className="text-2xl font-bold text-[#0F172A] dark:text-white tracking-tight">Upload Resume</h2>

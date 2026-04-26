@@ -174,7 +174,7 @@ function ApplicationDetails() {
             {/* CUSTOM DELETE MODAL */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-800 mx-4">
                         <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Delete Application?</h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
                             This action cannot be undone. All notes and data for this job will be removed.
@@ -197,11 +197,11 @@ function ApplicationDetails() {
                 </div>
             )}
 
-            {/* EDIT MODAL */}
+            {/* EDIT MODAL - Responsive */}
             {showEditModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-                    <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 my-8">
-                        <div className="p-8">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl md:rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 my-8 mx-4">
+                        <div className="p-5 md:p-8">
                             <div className="mb-6">
                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                                     Edit Application
@@ -212,7 +212,7 @@ function ApplicationDetails() {
                             </div>
 
                             <form onSubmit={handleEditSubmit} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company</label>
                                         <input
@@ -235,7 +235,7 @@ function ApplicationDetails() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status</label>
                                         <select
@@ -260,7 +260,7 @@ function ApplicationDetails() {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Location (Optional)</label>
                                         <input
@@ -302,7 +302,7 @@ function ApplicationDetails() {
                                     />
                                 </div>
 
-                                <div className="flex justify-end gap-3 pt-4">
+                                <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
                                     <button
                                         type="button"
                                         onClick={() => setShowEditModal(false)}
@@ -324,58 +324,70 @@ function ApplicationDetails() {
                 </div>
             )}
 
-            {/* BREADCRUMB */}
-            <div className="px-8 py-4 flex items-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+            {/* BREADCRUMB - Responsive */}
+            <div className="px-4 md:px-8 py-3 md:py-4 flex items-center gap-2 text-xs font-medium text-slate-400 dark:text-slate-500">
                 <Link to="/applications" className="hover:text-blue-600 dark:hover:text-blue-400">Applications</Link>
                 <span>›</span>
-                <span className="text-slate-600 dark:text-slate-300">{formatValue(app.job_title)}</span>
+                <span className="text-slate-600 dark:text-slate-300 truncate max-w-[200px] md:max-w-none">{formatValue(app.job_title)}</span>
             </div>
 
-            <div className="px-8 pb-12 max-w-7xl mx-auto">
-                {/* HEADER */}
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#0F172A] dark:text-white tracking-tight">
+            <div className="px-4 md:px-8 pb-6 md:pb-12 max-w-7xl mx-auto">
+                {/* HEADER - Responsive */}
+                <div className="mb-6 md:mb-8">
+                    <h1 className="text-2xl md:text-3xl font-bold text-[#0F172A] dark:text-white tracking-tight break-words">
                         {formatValue(app.job_title)}
                     </h1>
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3 mt-2">
                         <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-semibold text-sm">
                             <span className="w-5 h-5 bg-slate-200 dark:bg-slate-800 rounded flex items-center justify-center text-[10px]">🏢</span>
                             {formatValue(app.company_name)}
                         </div>
-                        <span className="text-slate-300 dark:text-slate-600">•</span>
-                        <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-sm font-medium">
-                            📍 {formatValue(app.location)}
-                        </div>
+                        {app.location && app.location !== "N/A" && (
+                            <>
+                                <span className="text-slate-300 dark:text-slate-600 hidden sm:inline">•</span>
+                                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-sm font-medium">
+                                    📍 {formatValue(app.location)}
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* MAIN CONTENT GRID - Responsive */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
                     {/* LEFT COLUMN */}
-                    <div className="lg:col-span-8 space-y-6">
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
-                            <div className="flex justify-between items-center mb-6">
+                    <div className="lg:col-span-8 space-y-4 md:space-y-6">
+                        {/* About the Job Card */}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-sm">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 md:mb-6">
                                 <h3 className="font-bold text-[#0F172A] dark:text-white text-lg">About the Job</h3>
                                 {app.job_link && (
-                                    <a href={app.job_link} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                                    <a
+                                        href={app.job_link}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline break-all"
+                                    >
                                         View original post
                                     </a>
                                 )}
                             </div>
                             <div className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                                <p className="whitespace-pre-wrap">{app.job_description || "No description provided."}</p>
+                                <p className="whitespace-pre-wrap text-sm md:text-base">{app.job_description || "No description provided."}</p>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
-                            <h3 className="font-bold text-[#0F172A] dark:text-white text-lg mb-6">My Notes</h3>
+                        {/* My Notes Card */}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl md:rounded-3xl p-5 md:p-8 shadow-sm">
+                            <h3 className="font-bold text-[#0F172A] dark:text-white text-lg mb-4 md:mb-6">My Notes</h3>
                             <div className="relative">
                                 <textarea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder="Jot down interview questions or reminders..."
-                                    className="w-full h-64 p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-600 dark:text-slate-300 resize-none"
+                                    className="w-full h-48 md:h-64 p-4 md:p-6 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl md:rounded-2xl outline-none focus:ring-2 focus:ring-blue-500/20 text-slate-600 dark:text-slate-300 resize-none text-sm md:text-base"
                                 />
-                                <div className="absolute bottom-4 right-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                     {saveStatus}
                                 </div>
                             </div>
@@ -383,8 +395,9 @@ function ApplicationDetails() {
                     </div>
 
                     {/* RIGHT COLUMN */}
-                    <div className="lg:col-span-4 space-y-6">
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                    <div className="lg:col-span-4 space-y-4 md:space-y-6">
+                        {/* Status Card */}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm">
                             <label className="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
                                 Status {isUpdating && "..."}
                             </label>
@@ -393,7 +406,7 @@ function ApplicationDetails() {
                                 value={app.status}
                                 onChange={(e) => handleStatusChange(e.target.value)}
                                 disabled={isUpdating}
-                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-white outline-none mb-6 cursor-pointer"
+                                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 dark:text-white outline-none mb-4 md:mb-6 cursor-pointer"
                             >
                                 <option value="Applied">Applied</option>
                                 <option value="Interviewing">Interviewing</option>
@@ -408,7 +421,7 @@ function ApplicationDetails() {
                             <div className="flex gap-3">
                                 <button
                                     onClick={handleOpenEditModal}
-                                    className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs transition-colors"
+                                    className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 rounded-xl text-xs md:text-sm transition-colors"
                                 >
                                     ✏️ Edit Job
                                 </button>
@@ -421,39 +434,57 @@ function ApplicationDetails() {
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-                            <h3 className="font-bold text-[#0F172A] dark:text-white mb-6">Job Details</h3>
-                            <div className="space-y-6">
-                                {[
-                                    { icon: "📅", label: "Date Applied", value: formatValue(app.application_date) },
-                                    { icon: "🔗", label: "Job Link", value: app.job_link ? <a href={app.job_link} target="_blank" rel="noreferrer" className="text-blue-500 truncate block max-w-[150px]">Open Link</a> : "N/A" },
-                                    { icon: "💼", label: "Location", value: formatValue(app.location) }
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-4">
-                                        <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center">{item.icon}</div>
-                                        <div className="min-w-0 flex-1">
-                                            <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{item.label}</p>
-                                            <div className="text-sm font-bold text-slate-700 dark:text-white">{item.value}</div>
+                        {/* Job Details Card */}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm">
+                            <h3 className="font-bold text-[#0F172A] dark:text-white mb-4 md:mb-6">Job Details</h3>
+                            <div className="space-y-4 md:space-y-6">
+                                <div className="flex items-start gap-3 md:gap-4">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-base md:text-lg flex-shrink-0">📅</div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Date Applied</p>
+                                        <div className="text-sm font-bold text-slate-700 dark:text-white break-words">{formatValue(app.application_date)}</div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-start gap-3 md:gap-4">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-base md:text-lg flex-shrink-0">🔗</div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Link</p>
+                                        <div className="text-sm font-bold text-slate-700 dark:text-white break-words">
+                                            {app.job_link ? (
+                                                <a href={app.job_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate block max-w-[200px] md:max-w-[150px]">
+                                                    Open Link
+                                                </a>
+                                            ) : "N/A"}
                                         </div>
                                     </div>
-                                ))}
+                                </div>
+
+                                <div className="flex items-start gap-3 md:gap-4">
+                                    <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-base md:text-lg flex-shrink-0">💼</div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Location</p>
+                                        <div className="text-sm font-bold text-slate-700 dark:text-white break-words">{formatValue(app.location)}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
-                            <div className="flex justify-between items-center mb-6">
+                        {/* Used Resume Card */}
+                        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl md:rounded-3xl p-5 md:p-6 shadow-sm">
+                            <div className="flex justify-between items-center mb-4 md:mb-6">
                                 <h3 className="font-bold text-[#0F172A] dark:text-white">Used Resume</h3>
                                 <button className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline">Change</button>
                             </div>
 
-                            <div className="flex items-center gap-4 p-4 border border-slate-200 dark:border-slate-700 rounded-2xl bg-slate-50 dark:bg-slate-800">
-                                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center rounded-xl text-indigo-600">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="flex items-center gap-3 md:gap-4 p-4 border border-slate-200 dark:border-slate-700 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-800">
+                                <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center rounded-xl text-indigo-600 flex-shrink-0">
+                                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold text-slate-700 dark:text-white truncate">
+                                    <p className="text-xs md:text-sm font-bold text-slate-700 dark:text-white truncate">
                                         {formatValue(app.resume_name || (app.resume_id ? "Attached Resume" : "No resume"))}
                                     </p>
                                     <p className="text-[10px] text-slate-400 dark:text-slate-500">

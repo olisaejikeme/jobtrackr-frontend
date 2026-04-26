@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { register } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import Toast from "../components/Toast";
@@ -6,13 +6,13 @@ import { useTheme } from "../context/ThemeContext";
 
 // Simple toggle icons
 const SunIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M3 12h2.25m.386-6.364l-1.591 1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M18.75 12a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z" />
     </svg>
 );
 
 const MoonIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
         <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
     </svg>
 );
@@ -27,8 +27,19 @@ function Register() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
 
     const navigate = useNavigate();
+
+    // Check mobile screen size
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 1024);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     async function handleRegister() {
         if (!name || !email || !password) {
@@ -57,30 +68,43 @@ function Register() {
         <div className="h-screen flex overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            {/* THEME TOGGLE BUTTON */}
+            {/* THEME TOGGLE BUTTON - Responsive positioning */}
             <button
                 onClick={toggleTheme}
-                className="absolute top-6 right-6 lg:right-[52%] z-50 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md transition-all active:scale-95"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 lg:right-[52%] z-50 p-2 md:p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 shadow-sm hover:shadow-md transition-all active:scale-95"
             >
                 {theme === "dark" ? <SunIcon /> : <MoonIcon />}
             </button>
 
-            {/* LEFT SIDE (FORM) */}
-            <div className="w-full lg:w-1/2 flex items-center justify-center px-6 bg-white lg:bg-[#F8FAFC] dark:bg-slate-950">
+            {/* LEFT SIDE (FORM) - Full width on mobile, half on desktop */}
+            <div className="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 py-6 sm:py-8 bg-white lg:bg-[#F8FAFC] dark:bg-slate-950 overflow-y-auto">
                 <div className="w-full max-w-md">
-                    <div className="mb-10">
-                        <div className="w-10 h-10 bg-[#0F172A] dark:bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold mb-6 shadow-lg shadow-slate-200 dark:shadow-none">
+                    {/* Mobile Logo */}
+                    {isMobile && (
+                        <div className="flex flex-col items-center mb-6 sm:mb-8">
+                            <div className="w-12 h-12 bg-[#0F172A] dark:bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold mb-3 shadow-lg">
+                                J
+                            </div>
+                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight text-center">
+                                Create your account
+                            </h2>
+                        </div>
+                    )}
+
+                    {/* Desktop Header - Hidden on mobile */}
+                    <div className="hidden sm:block mb-6 md:mb-8 lg:mb-10">
+                        <div className="w-9 h-9 md:w-10 md:h-10 bg-[#0F172A] dark:bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold mb-4 md:mb-6 shadow-lg shadow-slate-200 dark:shadow-none">
                             J
                         </div>
-                        <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">
                             Create your account
                         </h2>
-                        <p className="text-slate-500 dark:text-slate-400 font-medium">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base">
                             Track applications and optimize your resume today.
                         </p>
                     </div>
 
-                    <div className="space-y-5">
+                    <div className="space-y-4 sm:space-y-5">
                         {/* Name */}
                         <div>
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 block mb-2 uppercase tracking-widest">
@@ -91,7 +115,9 @@ function Register() {
                                 placeholder="e.g. Jane Doe"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 focus:border-slate-400 dark:focus:border-blue-500 transition-all font-medium"
+                                onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+                                className="w-full px-3 sm:px-4 py-3 md:py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 focus:border-slate-400 dark:focus:border-blue-500 transition-all font-medium text-sm sm:text-base"
+                                autoFocus
                             />
                         </div>
 
@@ -105,12 +131,13 @@ function Register() {
                                 placeholder="you@example.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 focus:border-slate-400 dark:focus:border-blue-500 transition-all font-medium"
+                                onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+                                className="w-full px-3 sm:px-4 py-3 md:py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 focus:border-slate-400 dark:focus:border-blue-500 transition-all font-medium text-sm sm:text-base"
                             />
                         </div>
 
-                        {/* Password row */}
-                        <div className="grid grid-cols-2 gap-4">
+                        {/* Password row - Stack on mobile, side by side on tablet+ */}
+                        <div className="flex flex-col sm:grid sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 block mb-2 uppercase tracking-widest">
                                     Password
@@ -120,7 +147,8 @@ function Register() {
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 transition-all font-medium"
+                                    onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+                                    className="w-full px-3 sm:px-4 py-3 md:py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 transition-all font-medium text-sm sm:text-base"
                                 />
                             </div>
 
@@ -133,7 +161,8 @@ function Register() {
                                     placeholder="••••••••"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full px-4 py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 transition-all font-medium"
+                                    onKeyPress={(e) => e.key === 'Enter' && handleRegister()}
+                                    className="w-full px-3 sm:px-4 py-3 md:py-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white outline-none focus:ring-4 focus:ring-slate-100 dark:focus:ring-blue-500/10 transition-all font-medium text-sm sm:text-base"
                                 />
                             </div>
                         </div>
@@ -141,17 +170,27 @@ function Register() {
                         <button
                             onClick={handleRegister}
                             disabled={loading}
-                            className="w-full bg-[#0F172A] dark:bg-blue-600 text-white py-4 rounded-2xl font-bold hover:shadow-xl hover:shadow-slate-200 dark:hover:shadow-blue-900/10 transition-all active:scale-[0.98] disabled:opacity-60"
+                            className="w-full bg-[#0F172A] dark:bg-blue-600 text-white py-3.5 md:py-4 rounded-xl md:rounded-2xl font-bold hover:shadow-xl hover:shadow-slate-200 dark:hover:shadow-blue-900/10 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
                         >
-                            {loading ? "Creating account..." : "Start tracking for free →"}
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Creating account...
+                                </span>
+                            ) : (
+                                "Start tracking for free →"
+                            )}
                         </button>
                     </div>
 
-                    <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-10 font-medium">
+                    <p className="text-center text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-6 sm:mt-8 md:mt-10 font-medium">
                         Already have an account?{" "}
                         <span
                             onClick={() => navigate("/login")}
-                            className="text-[#0F172A] dark:text-blue-400 font-bold cursor-pointer border-b-2 border-transparent hover:border-[#0F172A] dark:hover:border-blue-400 transition-all"
+                            className="text-[#0F172A] dark:text-blue-400 font-bold cursor-pointer hover:underline transition-all"
                         >
                             Log in
                         </span>
@@ -159,7 +198,7 @@ function Register() {
                 </div>
             </div>
 
-            {/* RIGHT SIDE (GRADIENT PANEL) - Standard dark colors work well here already */}
+            {/* RIGHT SIDE (GRADIENT PANEL) - Hidden on mobile, shown on desktop */}
             <div className="hidden lg:flex w-1/2 h-full relative bg-[#0F172A] dark:bg-slate-900 overflow-hidden">
                 <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px]" />
                 <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px]" />
