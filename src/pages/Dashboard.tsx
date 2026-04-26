@@ -171,39 +171,39 @@ function Dashboard() {
     }
 
     const Sidebar = () => (
-        <div className="flex flex-col gap-4 lg:gap-6 h-full shrink-0">
-            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-3xl p-5 relative overflow-hidden grayscale opacity-70">
-                <div className="absolute top-4 right-4 bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-tighter">Coming Soon</div>
-                <div className="w-9 h-9 bg-slate-200 dark:bg-slate-700 rounded-xl flex items-center justify-center mb-3 text-sm">✨</div>
-                <h4 className="font-bold text-slate-400 dark:text-slate-500 text-sm mb-1.5 tracking-tight">AI Resume Feedback</h4>
-                <p className="text-slate-400 dark:text-slate-500 text-[11px] font-medium mb-4 leading-normal">Upload your resume to get instant AI-powered feedback.</p>
-                <button disabled className="w-full py-2 bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 text-[11px] font-bold rounded-lg cursor-not-allowed">Locked</button>
+        <div className="flex flex-col gap-4 h-full shrink-0">
+            <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl md:rounded-3xl p-4 md:p-5 relative overflow-hidden grayscale opacity-70">
+                <div className="absolute top-3 right-3 md:top-4 md:right-4 bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[8px] font-black px-1.5 md:px-2 py-0.5 rounded-md uppercase tracking-tighter">Coming Soon</div>
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-200 dark:bg-slate-700 rounded-xl flex items-center justify-center mb-2 md:mb-3 text-sm">✨</div>
+                <h4 className="font-bold text-slate-400 dark:text-slate-500 text-xs md:text-sm mb-1 tracking-tight">AI Resume Feedback</h4>
+                <p className="text-slate-400 dark:text-slate-500 text-[10px] md:text-[11px] font-medium mb-3 md:mb-4 leading-normal">Upload your resume to get instant AI-powered feedback.</p>
+                <button disabled className="w-full py-1.5 md:py-2 bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 text-[10px] md:text-[11px] font-bold rounded-lg cursor-not-allowed">Locked</button>
             </div>
-            <div className="bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-3xl p-5 shadow-sm">
+            <div className="bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-2xl md:rounded-3xl p-4 md:p-5 shadow-sm">
                 <div className="flex items-center gap-2 text-blue-500 dark:text-blue-400 mb-2">
                     <span className="text-sm">💡</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest">Pro Tip</span>
+                    <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest">Pro Tip</span>
                 </div>
-                <p className="text-slate-500 dark:text-slate-400 text-[11px] font-medium leading-normal">Consistency is key. Try to track at least 3 applications a week.</p>
+                <p className="text-slate-500 dark:text-slate-400 text-[10px] md:text-[11px] font-medium leading-normal">Consistency is key. Try to track at least 3 applications a week.</p>
             </div>
         </div>
     );
 
     return (
-        <div className="h-[calc(100vh-64px)] flex flex-col p-6 lg:p-8 space-y-4 lg:space-y-6 overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
+        <div className="h-[calc(100vh-64px)] flex flex-col p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 overflow-hidden bg-[#F8FAFC] dark:bg-slate-950 transition-colors duration-300">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
-            {/* DELETE CONFIRMATION MODAL */}
+            {/* DELETE CONFIRMATION MODAL - Responsive */}
             <Modal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)}>
                 <div className="p-2">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Delete Application</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-8">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 md:mb-8">
                         Are you sure you want to delete this application? This action cannot be undone.
                     </p>
-                    <div className="flex justify-end gap-3">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3">
                         <button
                             onClick={() => setIsDeleteModalOpen(false)}
-                            className="px-5 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400"
+                            className="px-5 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                         >
                             Cancel
                         </button>
@@ -217,39 +217,101 @@ function Dashboard() {
                 </div>
             </Modal>
 
-            <div className="flex justify-between items-start shrink-0">
+            {/* Header Section - Responsive */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
-                    <p className="text-slate-400 dark:text-slate-500 text-xs font-medium mt-0.5">Your job search progress overview</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+                    <p className="text-slate-400 dark:text-slate-500 text-[11px] md:text-xs font-medium mt-0.5">Your job search progress overview</p>
                 </div>
-                <button onClick={() => {
-                    resetForm();
-                    setIsModalOpen(true);
-                }} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-md transition-all active:scale-95">+ Add Job Application</button>
+                <button
+                    onClick={() => {
+                        resetForm();
+                        setIsModalOpen(true);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-xs font-bold shadow-md transition-all active:scale-95 w-full sm:w-auto"
+                >
+                    + Add Job Application
+                </button>
             </div>
 
-            <div className="grid grid-cols-5 gap-4 lg:gap-6 shrink-0">
+            {/* Stats Grid - Responsive (2x2 on mobile, 5 columns on desktop) */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 lg:gap-6 shrink-0">
                 {stats.map((s, i) => (
-                    <div key={i} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex flex-col justify-between h-24 shadow-sm hover:border-slate-200 dark:hover:border-slate-700 transition-colors">
-                        <div className="flex items-center gap-2">
-                            <img src={s.icon} className="w-3.5 h-3.5 opacity-60 dark:opacity-40" alt="" />
-                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{s.title}</span>
+                    <div key={i} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl md:rounded-2xl p-3 md:p-4 flex flex-col justify-between h-20 md:h-24 shadow-sm hover:border-slate-200 dark:hover:border-slate-700 transition-colors">
+                        <div className="flex items-center gap-1.5 md:gap-2">
+                            <img src={s.icon} className="w-3 h-3 md:w-3.5 md:h-3.5 opacity-60 dark:opacity-40" alt="" />
+                            <span className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">{s.title}</span>
                         </div>
-                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-none">{s.value}</h2>
+                        <h2 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-none">{s.value}</h2>
                     </div>
                 ))}
             </div>
 
+            {/* Main Content Area - Responsive (stack on mobile, side-by-side on desktop) */}
             <div className="flex-1 min-h-0">
-                <div className="grid grid-cols-3 gap-6 h-full">
-                    <div className="col-span-2 min-h-0 h-full">
+                <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 md:gap-6 h-full">
+                    {/* Applications Table - Takes 2/3 on desktop, full width on mobile */}
+                    <div className="lg:col-span-2 min-h-0 h-full">
                         {applications.length > 0 ? (
-                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm h-full flex flex-col overflow-hidden">
-                                <div className="p-4 flex justify-between items-center border-b border-slate-50 dark:border-slate-800 shrink-0">
-                                    <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Recent Applications</h3>
+                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl md:rounded-2xl shadow-sm h-full flex flex-col overflow-hidden">
+                                <div className="p-3 md:p-4 flex justify-between items-center border-b border-slate-50 dark:border-slate-800 shrink-0">
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-200 text-xs md:text-sm">Recent Applications</h3>
                                 </div>
-                                <div className="flex-1 overflow-y-auto px-6">
-                                    <table className="w-full text-left border-separate border-spacing-0">
+                                <div className="flex-1 overflow-y-auto px-4 md:px-6">
+                                    {/* Mobile card view for recent applications */}
+                                    <div className="block md:hidden space-y-3 py-3">
+                                        {applications.slice(0, 5).map((app: any) => (
+                                            <div
+                                                key={app.id}
+                                                className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl p-4 hover:shadow-md transition-all cursor-pointer"
+                                                onClick={() => navigate(`/applications/${app.id}`)}
+                                            >
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <h4 className="font-bold text-slate-900 dark:text-white text-sm">{app.company_name}</h4>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{app.job_title}</p>
+                                                    </div>
+                                                    <div className="relative" onClick={(e) => e.stopPropagation()}>
+                                                        <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                                                            <img src={moreIcon} className="w-4 h-4 opacity-40 dark:opacity-30" alt="options" />
+                                                        </button>
+                                                        <div className="absolute right-0 top-8 w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xl rounded-xl py-1 z-20 hidden group-hover/menu:block">
+                                                            <button
+                                                                onClick={() => navigate(`/applications/${app.id}`)}
+                                                                className="w-full text-left px-3 py-1.5 text-[10px] text-slate-700 dark:text-slate-200 font-bold hover:bg-slate-50 dark:hover:bg-slate-700"
+                                                            >
+                                                                View Details
+                                                            </button>
+                                                            <div className="h-px bg-slate-100 dark:bg-slate-700 my-1" />
+                                                            <button
+                                                                onClick={() => handleDeleteClick(app.id!)}
+                                                                className="w-full text-left px-3 py-1.5 text-[10px] text-red-500 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-950/50"
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                                    <span className={`px-2 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-tight ${getStatusBadgeStyle(app.status)}`}>
+                                                        {app.status}
+                                                    </span>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/applications/${app.id}`);
+                                                        }}
+                                                        className="text-blue-600 dark:text-blue-400 text-[10px] font-bold hover:underline"
+                                                    >
+                                                        View Details →
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Desktop table view */}
+                                    <table className="w-full text-left border-separate border-spacing-0 hidden md:table">
                                         <thead className="sticky top-0 bg-white dark:bg-slate-900 z-10">
                                             <tr className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500 font-black">
                                                 <th className="py-4 border-b border-slate-50 dark:border-slate-800">Company</th>
@@ -295,10 +357,10 @@ function Dashboard() {
                                         </tbody>
                                     </table>
                                     {applications.length > 5 && (
-                                        <div className="py-4 text-center border-t border-slate-50 dark:border-slate-800">
+                                        <div className="py-3 md:py-4 text-center border-t border-slate-50 dark:border-slate-800">
                                             <button
                                                 onClick={() => navigate("/applications")}
-                                                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                                                className="text-[11px] md:text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
                                             >
                                                 View all {applications.length} applications →
                                             </button>
@@ -307,47 +369,51 @@ function Dashboard() {
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center p-12 text-center shadow-sm h-full overflow-hidden">
+                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl md:rounded-3xl flex flex-col items-center justify-center p-8 md:p-12 text-center shadow-sm h-full overflow-hidden">
                                 <img
                                     src={emptyFolderImage}
                                     alt="No applications"
-                                    className="w-32 h-32 mb-6 opacity-60 dark:opacity-40"
+                                    className="w-24 h-24 md:w-32 md:h-32 mb-4 md:mb-6 opacity-60 dark:opacity-40"
                                 />
-                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No applications tracked yet</h3>
-                                <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Start by adding your first job application</p>
+                                <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2">No applications tracked yet</h3>
+                                <p className="text-slate-500 dark:text-slate-400 text-xs md:text-sm mb-4 md:mb-6">Start by adding your first job application</p>
                                 <button
                                     onClick={() => {
                                         resetForm();
                                         setIsModalOpen(true);
                                     }}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-2xl text-sm font-bold shadow-lg transition-all active:scale-95"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 md:px-8 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold shadow-lg transition-all active:scale-95"
                                 >
                                     + Add Job Application
                                 </button>
                             </div>
                         )}
                     </div>
-                    <Sidebar />
+
+                    {/* Sidebar - Hidden on mobile, shows below on tablet, side on desktop */}
+                    <div className="lg:block mt-4 lg:mt-0">
+                        <Sidebar />
+                    </div>
                 </div>
             </div>
 
-            {/* ADD/EDIT FORM MODAL */}
+            {/* ADD/EDIT FORM MODAL - Responsive */}
             <Modal isOpen={isModalOpen} onClose={() => {
                 setIsModalOpen(false);
                 resetForm();
             }}>
-                <div className="mb-6">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">New Application</h2>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Log your latest job application details.</p>
+                <div className="mb-4 md:mb-6">
+                    <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">New Application</h2>
+                    <p className="text-[11px] md:text-xs text-slate-400 dark:text-slate-500 font-medium">Log your latest job application details.</p>
                 </div>
 
-                <form onSubmit={handleAddApplication} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
-                    <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleAddApplication} className="space-y-3 md:space-y-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Company</label>
                             <input
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
                                 placeholder="Apple"
                                 value={formData.company_name}
                                 onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
@@ -357,7 +423,7 @@ function Dashboard() {
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Title</label>
                             <input
                                 required
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
                                 placeholder="UX Designer"
                                 value={formData.job_title}
                                 onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
@@ -365,11 +431,11 @@ function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status</label>
                             <select
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                                 value={formData.status}
                                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                             >
@@ -383,18 +449,18 @@ function Dashboard() {
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Application Date</label>
                             <input
                                 type="date"
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white"
+                                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white"
                                 value={formData.application_date}
                                 onChange={(e) => setFormData({ ...formData, application_date: e.target.value })}
                             />
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Location (Optional)</label>
                             <input
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
                                 placeholder="Hybrid / Remote"
                                 value={formData.location}
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -404,7 +470,7 @@ function Dashboard() {
                             <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Link (Optional)</label>
                             <input
                                 type="url"
-                                className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all dark:text-white dark:placeholder:text-slate-500"
                                 placeholder="https://linkedin.com/..."
                                 value={formData.job_link}
                                 onChange={(e) => setFormData({ ...formData, job_link: e.target.value })}
@@ -415,21 +481,21 @@ function Dashboard() {
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Job Description (Optional)</label>
                         <textarea
-                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none min-h-[80px] resize-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                            className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none min-h-[70px] md:min-h-[80px] resize-none transition-all dark:text-white dark:placeholder:text-slate-500"
                             placeholder="Paste requirements or job summary here..."
                             value={formData.job_description}
                             onChange={(e) => setFormData({ ...formData, job_description: e.target.value })}
                         />
                     </div>
 
-                    <div className="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 space-y-3">
+                    <div className="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl md:rounded-2xl p-3 md:p-4 space-y-3">
                         <div className="flex justify-between items-center">
                             <label className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Resume Document (Optional)</label>
                             <div className="flex p-1 bg-slate-200/50 dark:bg-slate-700 rounded-lg">
                                 <button
                                     type="button"
                                     onClick={() => setResumeMode("select")}
-                                    className={`px-3 py-1 text-[9px] font-bold rounded-md transition-all ${resumeMode === 'select'
+                                    className={`px-2 md:px-3 py-1 text-[8px] md:text-[9px] font-bold rounded-md transition-all ${resumeMode === 'select'
                                         ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
@@ -439,7 +505,7 @@ function Dashboard() {
                                 <button
                                     type="button"
                                     onClick={() => setResumeMode("upload")}
-                                    className={`px-3 py-1 text-[9px] font-bold rounded-md transition-all ${resumeMode === 'upload'
+                                    className={`px-2 md:px-3 py-1 text-[8px] md:text-[9px] font-bold rounded-md transition-all ${resumeMode === 'upload'
                                         ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
                                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
@@ -451,7 +517,7 @@ function Dashboard() {
 
                         {resumeMode === "select" && resumes.length > 0 ? (
                             <select
-                                className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                                className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm outline-none shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                                 value={formData.resume_id || ""}
                                 onChange={(e) => setFormData({ ...formData, resume_id: Number(e.target.value) })}
                             >
@@ -461,7 +527,7 @@ function Dashboard() {
                         ) : (
                             <input
                                 type="file"
-                                className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 dark:text-slate-400"
+                                className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 md:file:mr-4 file:py-1.5 md:file:py-2 file:px-3 md:file:px-4 file:rounded-xl file:border-0 file:text-[9px] md:file:text-[10px] file:font-black file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer bg-white dark:bg-slate-800 p-1.5 rounded-xl md:rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 dark:text-slate-400"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) setSelectedFile(file);
@@ -473,14 +539,14 @@ function Dashboard() {
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Notes (Optional)</label>
                         <textarea
-                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none min-h-[70px] resize-none transition-all dark:text-white dark:placeholder:text-slate-500"
+                            className="w-full px-3 md:px-4 py-2 md:py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none min-h-[60px] md:min-h-[70px] resize-none transition-all dark:text-white dark:placeholder:text-slate-500"
                             placeholder="Referral from..."
                             value={formData.notes}
                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                         />
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4 sticky bottom-0 bg-white dark:bg-slate-900 pb-2">
+                    <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 sticky bottom-0 bg-white dark:bg-slate-900 pb-2">
                         <button
                             type="button"
                             onClick={() => {
@@ -494,7 +560,7 @@ function Dashboard() {
                         <button
                             disabled={loading}
                             type="submit"
-                            className="px-8 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-6 md:px-8 py-2.5 bg-slate-900 dark:bg-blue-600 hover:bg-black dark:hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? "Processing..." : "Track Application"}
                         </button>
